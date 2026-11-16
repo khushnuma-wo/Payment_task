@@ -7,6 +7,16 @@ import { AppModule } from './app.module';
 import { setupGracefulShutdown } from './common/lifecycle/graceful-shutdown';
 import { RedisIoAdapter } from './modules/realtime/redis-io.adapter';
 
+// Third-party clients (ioredis, the socket.io Redis adapter) reject internal
+// command promises when a connection's retry budget is exhausted. Node treats
+// an unhandled rejection as fatal by default, which would undermine the
+// documented "Redis down is non-fatal" guarantee the rest of the app relies
+// on. Log and continue instead of crashing the process.
+process.on('unhandledRejection', (reason) => {
+  const message = reason instanceof Error ? reason.message : String(reason);
+  Logger.warn(`Unhandled promise rejection (non-fatal): ${message}`, 'Bootstrap');
+});
+
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule, {
     bufferLogs: true, // let pino from the first log line

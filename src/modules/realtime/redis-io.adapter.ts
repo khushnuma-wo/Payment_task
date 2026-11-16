@@ -2,9 +2,11 @@ import { IoAdapter } from '@nestjs/platform-socket.io';
 import { ServerOptions } from 'socket.io';
 import { createAdapter } from '@socket.io/redis-adapter';
 import { ConfigService } from '@nestjs/config';
-import { HttpServer } from '@nestjs/common';
+import { HttpServer, Logger } from '@nestjs/common';
 import { INestApplicationContext } from '@nestjs/common';
 import Redis from 'ioredis';
+
+const logger = new Logger('RedisIoAdapter');
 
 /**
  * Swaps socket.io's in-memory adapter for the Redis pub/sub adapter.
@@ -29,6 +31,12 @@ export class RedisIoAdapter extends IoAdapter {
 
     const pubClient = new Redis({ host: cfg.host, port: cfg.port, db: cfg.db });
     const subClient = pubClient.duplicate();
+
+    // Without these, an unhandled 'error' event (e.g. Redis unreachable, retries
+    // exhausted) throws and crashes the whole process — the opposite of the
+    // "Redis down is non-fatal" guarantee the rest of the app relies on.
+    pubClient.on('error', (err) => logger.warn(`pub client error (non-fatal): ${err.message}`));
+    subClient.on('error', (err) => logger.warn(`sub client error (non-fatal): ${err.message}`));
 
     this.adapter = createAdapter(pubClient, subClient, {
       requestsTimeout: 10_000,

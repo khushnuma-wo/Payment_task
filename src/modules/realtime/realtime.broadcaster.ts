@@ -33,6 +33,11 @@ export class RealtimeBroadcaster implements OnModuleInit {
   ) {
     const cfg = config.get('redis');
     this.subscriber = new Redis({ host: cfg.host, port: cfg.port, db: cfg.db });
+    // Without this, an unhandled 'error' event (e.g. Redis unreachable, retries
+    // exhausted) throws and crashes the whole process.
+    this.subscriber.on('error', (err) =>
+      this.logger.warn(`subscriber error (non-fatal): ${err.message}`),
+    );
   }
 
   async onModuleInit(): Promise<void> {

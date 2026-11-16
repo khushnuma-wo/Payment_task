@@ -30,10 +30,6 @@ export class CorrelationIdMiddleware implements NestMiddleware {
     // Re-bind logger for this request.
     (this.logger.logger as any).child({ correlationId });
 
-    res.on('finish', () => {
-      // structured access log with latency & status
-      res.setHeader('X-Correlation-Id', correlationId);
-    });
     next();
   }
 }

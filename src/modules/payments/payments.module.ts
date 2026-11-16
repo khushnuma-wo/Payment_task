@@ -5,9 +5,10 @@ import { PaymentsService } from './payments.service';
 import { Payment } from './entities/payment.entity';
 import { PaymentReconcileJob, PAYMENT_RECONCILER } from './reconciliation.service';
 import { DefaultGatewayReconciler } from './gateway-reconciler.service';
+import { RedisModule } from '../../infrastructure/redis/redis.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Payment])],
+  imports: [RedisModule, TypeOrmModule.forFeature([Payment])],
   controllers: [PaymentsController],
   providers: [
     PaymentsService,

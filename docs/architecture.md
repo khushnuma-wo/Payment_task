@@ -1,6 +1,8 @@
 # Payment Service — Architecture Diagram
 
-## System overview
+![Architecture diagram](architecture-diagram.svg)
+
+## System overview (ASCII walkthrough of the same diagram)
 
 ```
 ┌──────────────┐   HTTPS (REST) / WS (JWT)   ┌──────────────────────┐

@@ -1,11 +1,18 @@
 import { DataSource, DataSourceOptions } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import { randomUUID } from 'crypto';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 import { Payment, PaymentStatus } from '../../src/modules/payments/entities/payment.entity';
 import { WebhooksService } from '../../src/modules/webhooks/webhooks.service';
 import { GatewayWebhookDto } from '../../src/modules/webhooks/dto/gateway-webhook.dto';
 import type { WebhookResponseDto } from '../../src/modules/webhooks/dto/gateway-webhook.dto';
 import { buildTypeOrmOptions } from '../../src/database/typeorm-config';
+
+const MIGRATION_SQL = readFileSync(
+  join(__dirname, '../../src/database/migrations/001-initial-schema.sql'),
+  'utf8',
+);
 
 /**
  * Concurrency / idempotency test against a REAL Postgres instance.
@@ -38,10 +45,14 @@ describe('concurrent webhook idempotency (real Postgres)', () => {
     try {
       dataSource = new DataSource({
         ...buildTypeOrmOptions(cfg),
-        synchronize: true, // build tables for the test run
+        synchronize: false, // use the real migration below, not TypeORM's inferred DDL
       } as DataSourceOptions);
       await dataSource.initialize();
-      await dataSource.query(`CREATE EXTENSION IF NOT EXISTS pgcrypto`);
+      // Bootstrap with the actual production migration (idempotent: CREATE ... IF NOT EXISTS)
+      // rather than synchronize:true, which emits uuid_generate_v4() defaults for
+      // @PrimaryGeneratedColumn('uuid') columns and requires the uuid-ossp extension —
+      // the migration instead uses gen_random_uuid(), built into Postgres 13+.
+      await dataSource.query(MIGRATION_SQL);
 
       const cs = { get: (k: string) => (k === 'locking.strategy' ? 'pessimistic' : undefined) };
       service = new WebhooksService(dataSource, cs as unknown as ConfigService);

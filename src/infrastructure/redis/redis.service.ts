@@ -57,6 +57,15 @@ export class RedisService {
     }
   }
 
+  /** Best-effort delete; cache invalidation is an optimization, never a correctness path. */
+  async del(key: string): Promise<void> {
+    try {
+      await this.client.del(key);
+    } catch (err) {
+      this.logger.warn(`del failed: ${(err as Error).message}`);
+    }
+  }
+
   async publish(channel: string, message: string): Promise<void> {
     try {
       await this.client.publish(channel, message);

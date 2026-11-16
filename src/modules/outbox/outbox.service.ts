@@ -80,7 +80,7 @@ export class OutboxService {
       .where(
         `id IN (
            SELECT id FROM outbox_events
-           WHERE status = :pending OR (status = :processing AND availableAfter <= :now)
+           WHERE status = :pending OR (status = :processing AND available_after <= :now)
            ORDER BY created_at
            LIMIT :batch
          )`,

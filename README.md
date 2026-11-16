@@ -11,8 +11,11 @@ Idempotency is enforced by **database constraints**, not by distributed locks.
 
 ## 1. System Architecture
 
-> **Deliverables:** architecture diagram → [`docs/architecture.md`](docs/architecture.md)
+> **Deliverables:** architecture diagram → [`docs/architecture-diagram.svg`](docs/architecture-diagram.svg)
+> (walkthrough: [`docs/architecture.md`](docs/architecture.md))
 > · design decisions → [`docs/design-decisions.md`](docs/design-decisions.md).
+
+![Architecture diagram](docs/architecture-diagram.svg)
 
 ```
 ┌────────────┐   HTTPS/WS     ┌────────────────────┐
