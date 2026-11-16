@@ -7,6 +7,11 @@ PostgreSQL is the **source of truth** for all financial state. Redis is used onl
 where it adds real value (cross-instance websocket fan-out, optional caching).
 Idempotency is enforced by **database constraints**, not by distributed locks.
 
+> This project was completed on top of a partially-built codebase. See
+> [`CHANGES.md`](CHANGES.md) for the bugs found and fixed (several of them
+> only surfaced by actually running the service against a real PostgreSQL +
+> Redis instance), and what was added.
+
 ---
 
 ## 1. System Architecture
